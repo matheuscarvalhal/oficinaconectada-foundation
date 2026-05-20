@@ -7,6 +7,7 @@ data "aws_availability_zones" "available" {}
 locals {
   az_a = data.aws_availability_zones.available.names[0]
   az_b = data.aws_availability_zones.available.names[1]
+  eks_cluster_name = "${var.project_name}-prod-eks"
 
   ecr_repositories = [
     "oficinaconectada-app",
@@ -52,7 +53,9 @@ resource "aws_subnet" "public_a" {
   map_public_ip_on_launch = true
 
   tags = merge({
-    Name = "${var.project_name}-public-a"
+    Name                                        = "${var.project_name}-public-a"
+    "kubernetes.io/cluster/${local.eks_cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                   = "1"
   }, local.common_tags)
 }
 
@@ -63,7 +66,9 @@ resource "aws_subnet" "public_b" {
   map_public_ip_on_launch = true
 
   tags = merge({
-    Name = "${var.project_name}-public-b"
+    Name                                        = "${var.project_name}-public-b"
+    "kubernetes.io/cluster/${local.eks_cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                   = "1"
   }, local.common_tags)
 }
 
@@ -73,7 +78,9 @@ resource "aws_subnet" "private_a" {
   availability_zone = local.az_a
 
   tags = merge({
-    Name = "${var.project_name}-private-a"
+    Name                                                 = "${var.project_name}-private-a"
+    "kubernetes.io/cluster/${local.eks_cluster_name}"    = "shared"
+    "kubernetes.io/role/internal-elb"                    = "1"
   }, local.common_tags)
 }
 
@@ -83,7 +90,9 @@ resource "aws_subnet" "private_b" {
   availability_zone = local.az_b
 
   tags = merge({
-    Name = "${var.project_name}-private-b"
+    Name                                                 = "${var.project_name}-private-b"
+    "kubernetes.io/cluster/${local.eks_cluster_name}"    = "shared"
+    "kubernetes.io/role/internal-elb"                    = "1"
   }, local.common_tags)
 }
 
