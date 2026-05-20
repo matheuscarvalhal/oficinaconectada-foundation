@@ -1,0 +1,30 @@
+﻿name: Destroy foundation infrastructure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: sa-east-1
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+      - name: Terraform Destroy
+        working-directory: ./terraform
+        run: terraform destroy -auto-approve -input=false
